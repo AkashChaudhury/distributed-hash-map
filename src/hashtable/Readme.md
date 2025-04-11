@@ -17,3 +17,9 @@ HashTable Class
 For testing we can run this
 g++ -o hashtable main.cpp hash.cpp -pthread
 ./hashtable
+
+
+
+Server
+g++ -o hash_table_server hash_service.cpp hash.cpp -lpthread
+./hash_table_server 9090
