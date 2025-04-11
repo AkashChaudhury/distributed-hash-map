@@ -11,7 +11,7 @@ class Node {
 public:
     string key;
     // can be converted to any other data type
-    int value;
+    void *value;
     Node *next;
     Node *prev;
 
@@ -19,7 +19,7 @@ public:
     Node();
 
     // Constructor with value
-    Node(string k, int v);
+    Node(string k, void *v);
 };
 
 class HashEntry {
@@ -44,7 +44,7 @@ public:
 
     // always call this after checkKey
     // Return value of key
-    int returnVal(string key);
+    void* returnVal(string key);
 
     // always call this after checkKey
     // delete key and value
@@ -52,7 +52,7 @@ public:
 
     // always call this after checkKey
     // add key and value
-    void addKey(string key, int value);
+    void addKey(string key, void *value);
 };
 
 // ----------- HashTable Class -------------
@@ -67,9 +67,9 @@ private:
 public:
     HashTable(int sz);
     ~HashTable();
-    void insert(const string& key, int value);
+    void insert(const string& key, void *value);
     bool exists(const string& key);
-    int get(const string& key);
+    void* get(const string& key);
     void remove(const string& key);
 };
 

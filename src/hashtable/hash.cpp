@@ -3,12 +3,12 @@
 
 Node::Node() {
     key = " ";
-    value = -1;
+    value = nullptr;
     next = nullptr;
     prev = nullptr;
 }
 
-Node::Node(string k, int v) {
+Node::Node(string k, void *v) {
     key = k;
     value = v;
     next = nullptr;
@@ -66,7 +66,7 @@ bool HashEntry::checkKey(string key) {
     return false;
 }
 
-int HashEntry::returnVal(string key) {
+void* HashEntry::returnVal(string key) {
     Node *temp = head->next;
     while (temp != tail) {
         if (temp->key == key) return temp->value;
@@ -86,7 +86,7 @@ void HashEntry::delKey(string key) {
     }
 }
 
-void HashEntry::addKey(string key, int value) {
+void HashEntry::addKey(string key, void *value) {
     Node *temp = new Node(key, value);
     add(temp);
 }
@@ -123,7 +123,7 @@ int HashTable::hashFunc(const string& key) {
     return hash % size;
 }
 
-void HashTable::insert(const string& key, int value) {
+void HashTable::insert(const string& key, void *value) {
     pthread_mutex_lock(&lock);
     int idx = hashFunc(key);
     if (buckets[idx]->checkKey(key)) {
@@ -141,10 +141,10 @@ bool HashTable::exists(const string& key) {
     return found;
 }
 
-int HashTable::get(const string& key) {
+void* HashTable::get(const string& key) {
     pthread_mutex_lock(&lock);
     int idx = hashFunc(key);
-    int val = buckets[idx]->checkKey(key) ? buckets[idx]->returnVal(key) : -1;
+    void *val = buckets[idx]->checkKey(key) ? buckets[idx]->returnVal(key) : nullptr;
     pthread_mutex_unlock(&lock);
     return val;
 }
