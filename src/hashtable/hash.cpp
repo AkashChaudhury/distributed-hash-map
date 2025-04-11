@@ -116,7 +116,7 @@ HashTable::~HashTable() {
 // found this in google
 // more optimized
 int HashTable::hashFunc(const string& key) {
-    unsigned long hash = 5381;
+    long long hash = 5381;
     for (char c : key) {
         hash = hash * 33 + c;
     }
