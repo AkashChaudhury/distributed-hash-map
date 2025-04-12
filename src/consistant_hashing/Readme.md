@@ -1,1 +1,5 @@
-g++ -o consistent_hash_server server.cpp hash_ring_final.cpp ../hashtable/hash.cpp ../hash_functions/hash_functions.cpp -lpthread
+This is implementation of Consistant Hashing
+API:
+Get Node: get node for Hashing table, where hashing related perf are to be done
+Add Node: Add a node
+Delete Node: Delete a node
