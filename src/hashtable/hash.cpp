@@ -237,8 +237,6 @@ HashTable::HashTable(int sz, string name, map<size_t, string> hash, set<string> 
     pthread_mutex_init(&lock, nullptr);
     int myHash = HashFunc(name, size);
     for (const string& nodeAddr : Nodes) {
-
-        cout << "\nGet Keys from " << nodeAddr << "\n";
         // Skip fetching from self
         if (HashFunc(nodeAddr, MAX_HASH) == myHash) continue;
 
@@ -247,9 +245,7 @@ HashTable::HashTable(int sz, string name, map<size_t, string> hash, set<string> 
 
         vector<string> toTake;
         for (const string& key : remoteKeys) {
-            cout << "\nCheck Keys from " << nodeAddr << " key = " << key << " should be in " << check(key, hash) << "\n";
             if (check(key, hash) == name) {
-                cout << "\nInsert Key from node " << nodeAddr << " key = " << key  << "\n";
                 // 2. Get the value from the remote node
                 string val = getValueFromNode(nodeAddr, key); 
 
