@@ -1,10 +1,8 @@
 # distributed-hash-map
 
-# distributed-hash-map
-
 Problem statement:
 
-Stage 1:
+Stage 1: (Checked)
 
 Introduction
   A common data structure used in any software system is a ‘hash  table’ (and there are several varieties of it).  For an in-memory hash table, memory foot print is extremely critical. As data continues to grow on a massive  scale (millions and billions of KV pairs), resource constraints begin to surface and it's not possible to store KV pairs for an in-mem HT, without being swapped. One solution is to have a distributed hash table where each node stores some batch of KV pairs (part of the complete namespace). 
@@ -39,3 +37,6 @@ designed to be deployable across nodes.
   - You can be as innovative as possible in deciding the individual hash table design (and in-mem structure/form factor)
     or choice of the hash function.
 
+Stage 2: (Brain Storming)
+
+Stage 3: (Checked)
