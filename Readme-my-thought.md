@@ -25,9 +25,13 @@ So I went with approach 1
 
 5. My Hash Table servers will initiate from ConsistentHashRing Client.
 They are independent but ConsistentHashRing Client will add or remove the servers as of now.
+
 (Ideally it should have been like below diagram)
+
 client-> ConsistentHashRing server -> HashTable Serve
+
 but it is
+
 ConsistentHashRing Client -> HashTable Serve
 
 If I get time will improve this
