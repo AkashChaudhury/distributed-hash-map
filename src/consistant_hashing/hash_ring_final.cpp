@@ -64,12 +64,13 @@ void startHashTableServer(const string& node, map<size_t, string> hashes, set<st
             continue;
         }
 
+
+        // Handle the client in a new thread
         thread([clientSock, ht]() {
-            handleClient(clientSock, ht);  // Handle the client in a new thread
+            handleClient(clientSock, ht);
         }).detach();
     }
 
-    // Cleanup (though this will likely never be reached)
     close(serverSock);
     delete ht;
 }
@@ -118,4 +119,43 @@ void ConsistentHashRing::removeNode (const string& node)  {
 
     HashTable *ht = serverMap[node];
     ht->stopServerFunc(this->hashRing, this->nodes);
+}
+
+bool ConsistentHashRing::isNodeAlive(const string& nodeAddr) {
+    size_t colonPos = nodeAddr.find(':');
+    if (colonPos == string::npos) return {};
+
+    string ip = nodeAddr.substr(0, colonPos);
+    int port = stoi(nodeAddr.substr(colonPos + 1));
+
+    // Connect and request keys
+    int sock = RPC::connectToServer(ip, port);
+    if (sock < 0) return false;
+
+    string request = "HEARTBEAT\n";
+    send(sock, request.c_str(), request.size(), 0);
+
+    char buffer[4096] = {0};
+    recv(sock, buffer, sizeof(buffer), 0);
+    close(sock);
+
+    string resp = string(buffer);
+    if (resp == "ALIVE") return true;
+    return false;
+}
+
+void* ConsistentHashRing::heartbeatMonitor(void* arg) {
+    ConsistentHashRing *ring = static_cast<ConsistentHashRing*>(arg);
+    while (true) {
+        for (string value : ring->nodes) {
+            cout << value << " ";
+            if (!ring->isNodeAlive(value)) {
+                cout << "[Heartbeat] Node down: " << value << " — removing from ring.\n";
+            }
+        }
+
+        sleep(5);  // Heartbeat interval
+    }
+
+    return nullptr;
 }

@@ -30,3 +30,4 @@ Get All keys
 Delete Key/Value pair
 Set Key/Value pair
 Check if a key value pair exists or not
+Heartbeat of the server

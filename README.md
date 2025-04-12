@@ -39,4 +39,3 @@ designed to be deployable across nodes.
   - You can be as innovative as possible in deciding the individual hash table design (and in-mem structure/form factor)
     or choice of the hash function.
 
-

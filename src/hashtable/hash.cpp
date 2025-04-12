@@ -228,7 +228,9 @@ void RPC::deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys) {
     close(sock);
 }
 
-
+string RPC::heartBeatResp() {
+    return "ALIVE";
+}
 
 // ---------------- HashTable ----------------
 
@@ -453,6 +455,8 @@ string HashTable::handleRPCRequest(const string& input) {
         string key, value;
         iss >> key >> value;
         return handleSetValue(key, value);
+    } else if (cmd == "HEARTBEAT") {
+        return heartBeatResp();
     }
     else {
         return "ERR_UNKNOWN_COMMAND";
@@ -479,4 +483,8 @@ string HashTable::getValueFromNode(const string& nodeAddr, const string& key) {
 
 void HashTable::deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys) {
     RPC::deleteKeysOnNode(nodeAddr, keys);
+}
+
+string HashTable::heartBeatResp() {
+    return RPC::heartBeatResp();
 }

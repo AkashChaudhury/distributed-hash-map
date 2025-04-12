@@ -26,6 +26,8 @@ So I went with approach 1
 5. My Hash Table servers will initiate from ConsistentHashRing Server.
 They are not independent
 
+6. Heart Beat of Hash Table servers are also checked, will be usefull in Stage 2.
+
 
 
 How to Run:
@@ -39,6 +41,7 @@ g++ -o consistent_hash_server server.cpp hash_ring_final.cpp ../hashtable/hash.c
 Stage 2:
 Create replicas of key/value pair
 Atleast 3
+When Heart beat is not passed, we can make one more replica
 
 how to implement?
 When we recive data, we can do something like

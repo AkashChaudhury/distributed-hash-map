@@ -8,13 +8,18 @@
 #include <vector>
 #include "../hash_functions/hash_functions.h"
 #include "../hashtable/hash.h"
+
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+
 using namespace std;
 
 
 void startHashTableServer(const string& node, map<size_t, string> hashes, set<string>& allNodes, map<string, HashTable*> &serverMap);
 void handleClient(int clientSock, HashTable* ht);
 
-class ConsistentHashRing {
+class ConsistentHashRing : public RPC{
     int numVirtualNodes;
     map<size_t, string> hashRing;
     set<string> nodes;
@@ -27,6 +32,9 @@ public:
     void removeNode(const string& node);
     string getNodeForKey(string key);
     int hashFunc(const string& key);
+    static void* heartbeatMonitor(void* arg);
+    bool isNodeAlive(const string& nodeAddr);
+
     void printRing() const {
         cout << "=== Hash Ring State ===\n";
         for (auto& node: hashRing) {

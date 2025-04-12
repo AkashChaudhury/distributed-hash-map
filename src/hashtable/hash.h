@@ -93,6 +93,7 @@ public:
     void deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys);
     void setValueToNode(const string& nodeAddr, const string& key, const string& val);
     // RPC Server-handling methods
+    string heartBeatResp();
     
 }; 
 
@@ -140,6 +141,7 @@ public:
     string handleGetValue(const string& key);
     string handleDeleteKeys(const string& keysStr);
     string handleSetValue(const string& key, const string& value);
+    string heartBeatResp();
 };
 
 #endif

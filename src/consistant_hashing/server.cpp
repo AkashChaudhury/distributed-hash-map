@@ -58,6 +58,11 @@ int main() {
     int virtualNodeCount = 3;
     ConsistentHashRing ring(virtualNodeCount);
 
+
+    pthread_t hbThread;
+    pthread_create(&hbThread, nullptr, ConsistentHashRing::heartbeatMonitor, &ring);
+    pthread_detach(hbThread);
+
     while (true) {
         printMenu();
 
