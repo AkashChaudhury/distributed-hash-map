@@ -6,6 +6,8 @@
 #include <netinet/in.h>
 #include <vector>
 #include <set>
+// wanted to use pthread, but using thread felt more easy
+// thread can afford more args
 #include <thread>
 
 void handleClient(int clientSock, HashTable* ht) {
