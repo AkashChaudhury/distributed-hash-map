@@ -23,10 +23,16 @@ but in scenario 2, data will get to another node, even if node fails, the data w
 
 So I went with approach 1
 
-5. My Hash Table servers will initiate from ConsistentHashRing Server.
-They are not independent
+5. My Hash Table servers will initiate from ConsistentHashRing Client.
+They are independent but ConsistentHashRing Client will add or remove the servers as of now.
+(Ideally it should have been like below diagram)
+client-> ConsistentHashRing server -> HashTable Serve
+but it is
+ConsistentHashRing Client -> HashTable Serve
 
-6. Heart Beat of Hash Table servers are also checked, will be usefull in Stage 2.
+If I get time will improve this
+
+7. Heart Beat of Hash Table servers are also checked, will be usefull in Stage 2.
 
 
 
