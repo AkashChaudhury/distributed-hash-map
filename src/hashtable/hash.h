@@ -15,6 +15,7 @@
 #include <sstream>
 #include <set>
 #include <map>
+#include <atomic>
 
 
 using namespace std;
@@ -90,6 +91,7 @@ public:
     vector<string> getKeysFromNode(const string& nodeAddr);
     string getValueFromNode(const string& nodeAddr, const string& key);
     void deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys);
+    void setValueToNode(const string& nodeAddr, const string& key, const string& val);
     // RPC Server-handling methods
     
 }; 
@@ -103,6 +105,8 @@ private:
     LinkedList metadata;
     unordered_map<string, Node*> metadataKey;
     string MyNodeName;
+    atomic<bool> stopServer;
+
 
     // RPC Server-handling methods
     int connectToServer(const string& ip, int port);
@@ -123,6 +127,11 @@ public:
     void remove(const string& key);
     vector<string> exportAll();
     void removeKeys(const vector<string>& keys);
+    void stopServerFunc(map<size_t, string> hash, set<string> Nodes);
+
+    bool serverStopSig() {
+        return stopServer;
+    }
 
     // want to shift this to RPC class
     // but time limitations are there

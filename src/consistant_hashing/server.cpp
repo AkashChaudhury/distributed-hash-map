@@ -5,22 +5,24 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include "hash_ring_final.h"  // Includes ConsistentHashRing and HashTable
+#include "hash_ring_final.h" 
+using namespace std;
 
 void printMenu() {
-    std::cout << "\n===== Distributed Hash Table Menu =====\n";
-    std::cout << "1. Add Node\n";
-    std::cout << "2. Get Node for Key\n";
-    std::cout << "3. Get Value for Key\n";
-    std::cout << "4. Set Key-Value\n";
-    std::cout << "5. Exit\n";
-    std::cout << "Choose an option: ";
+    cout << "\n===== Distributed Hash Table Menu =====\n";
+    cout << "1. Add Node\n";
+    cout << "2. Get Node for Key\n";
+    cout << "3. Get Value for Key\n";
+    cout << "4. Set Key-Value\n";
+    cout << "5. Remove Node\n"; 
+    cout << "6. Exit\n";
+    cout << "Choose an option: ";
 }
 
-std::string sendRPC(const std::string& node, const std::string& request) {
+string sendRPC(const string& node, const string& request) {
     auto pos = node.find(":");
-    std::string hostname = node.substr(0, pos);
-    int port = std::stoi(node.substr(pos + 1));
+    string hostname = node.substr(0, pos);
+    int port = stoi(node.substr(pos + 1));
 
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
@@ -48,7 +50,7 @@ std::string sendRPC(const std::string& node, const std::string& request) {
     int valread = recv(sock, buffer, sizeof(buffer), 0);
     close(sock);
 
-    return std::string(buffer, valread);
+    return string(buffer, valread);
 }
 
 int main() {
@@ -59,59 +61,66 @@ int main() {
         printMenu();
 
         int choice;
-        std::cin >> choice;
-        std::cin.ignore(); // Clear newline
+        cin >> choice;
+        cin.ignore(); // Clear newline
 
         if (choice == 1) {
-            std::string node;
-            std::cout << "Enter node address (e.g., 127.0.0.1:5000): ";
-            std::getline(std::cin, node);
+            string node;
+            cout << "Enter node address (e.g., 127.0.0.1:5000): ";
+            getline(cin, node);
             ring.addNode(node);
-            std::cout << "Node " << node << " added successfully.\n";
+            cout << "Node " << node << " added successfully.\n";
         }
         else if (choice == 2) {
-            std::string key;
-            std::cout << "Enter key: ";
-            std::getline(std::cin, key);
-            std::string node = ring.getNodeForKey(key);
-            std::cout << "Key \"" << key << "\" maps to node: " << node << std::endl;
+            string key;
+            cout << "Enter key: ";
+            getline(cin, key);
+            string node = ring.getNodeForKey(key);
+            cout << "Key \"" << key << "\" maps to node: " << node << endl;
         }
         else if (choice == 3) {
-            std::string key;
-            std::cout << "Enter key to get value: ";
-            std::getline(std::cin, key);
-            std::string node = ring.getNodeForKey(key);
+            string key;
+            cout << "Enter key to get value: ";
+            getline(cin, key);
+            string node = ring.getNodeForKey(key);
 
             if (node.empty()) {
-                std::cout << "No nodes available in the ring.\n";
+                cout << "No nodes available in the ring.\n";
             } else {
-                std::string request = "GETVAL " + key;
-                std::string response = sendRPC(node, request);
-                std::cout << "Response: " << response << std::endl;
+                string request = "GETVAL " + key;
+                string response = sendRPC(node, request);
+                cout << "Response: " << response << endl;
             }
         }
         else if (choice == 4) {
-            std::string key, value;
-            std::cout << "Enter key: ";
-            std::getline(std::cin, key);
-            std::cout << "Enter value: ";
-            std::getline(std::cin, value);
-            std::string node = ring.getNodeForKey(key);
+            string key, value;
+            cout << "Enter key: ";
+            getline(cin, key);
+            cout << "Enter value: ";
+            getline(cin, value);
+            string node = ring.getNodeForKey(key);
 
             if (node.empty()) {
-                std::cout << "No nodes available in the ring.\n";
+                cout << "No nodes available in the ring.\n";
             } else {
-                std::string request = "SETVAL " + key + " " + value;
-                std::string response = sendRPC(node, request);
-                std::cout << "Response: " << response << std::endl;
+                string request = "SETVAL " + key + " " + value;
+                string response = sendRPC(node, request);
+                cout << "Response: " << response << endl;
             }
         }
         else if (choice == 5) {
-            std::cout << "Exiting.\n";
+            string node;
+            cout << "Enter node address to remove (e.g., 127.0.0.1:5000): ";
+            getline(cin, node);
+            ring.removeNode(node);
+            cout << "Node " << node << " removed successfully.\n";
+        }
+        else if (choice == 6) {
+            cout << "Exiting.\n";
             break;
         }
         else {
-            std::cout << "Invalid option. Try again.\n";
+            cout << "Invalid option. Try again.\n";
         }
     }
 

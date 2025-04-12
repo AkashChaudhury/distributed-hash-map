@@ -177,6 +177,31 @@ string RPC::getValueFromNode(const string& nodeAddr, const string& key) {
     return string(buffer);
 }
 
+void RPC::setValueToNode(const string& nodeAddr, const string& key, const string& val) {
+    void RPC::setValueToNode(const string& nodeAddr, const string& key, const string& val) {
+    // Parse IP:port
+    size_t colonPos = nodeAddr.find(':');
+    if (colonPos == string::npos) return;
+
+    string ip = nodeAddr.substr(0, colonPos);
+    int port = stoi(nodeAddr.substr(colonPos + 1));
+
+    // Connect to the server
+    int sock = connectToServer(ip, port);
+    if (sock < 0) return;
+
+    string request = "SETVAL " + key + " " + val;
+    send(sock, request.c_str(), request.size(), 0);
+
+    char buffer[4096] = {0};
+    int bytesRead = recv(sock, buffer, sizeof(buffer), 0);
+    close(sock);
+
+    if (bytesRead <= 0) return;
+
+    return;
+}
+
 
 void RPC::deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys) {
     // Parse IP:port
@@ -213,6 +238,7 @@ void RPC::deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys) {
 // buckets = vector<HashEntry*>(sz, new HashEntry(0));
 // Learned something new :)
 HashTable::HashTable(int sz, string name) : size(sz) {
+    stopServer = false;
     MyNodeName = name;
     buckets.reserve(sz);
     for (int i = 0; i < sz; ++i) {
@@ -221,6 +247,7 @@ HashTable::HashTable(int sz, string name) : size(sz) {
     pthread_mutex_init(&lock, nullptr);
 }
 
+// Get Node Address
 string check(string key, map<size_t, string> hashRing) {
     int hashVal = HashFunc(key, MAX_HASH);
     auto it = hashRing.lower_bound(hashVal);
@@ -229,6 +256,7 @@ string check(string key, map<size_t, string> hashRing) {
 }
 
 HashTable::HashTable(int sz, string name, map<size_t, string> hash, set<string> Nodes) : size(sz) {
+    stopServer = false;
     MyNodeName = name;
     buckets.reserve(sz);
     for (int i = 0; i < sz; ++i) {
@@ -250,7 +278,7 @@ HashTable::HashTable(int sz, string name, map<size_t, string> hash, set<string> 
                 string val = getValueFromNode(nodeAddr, key); 
 
                 // 3. Insert into local table
-                string* valPtr = new std::string(val);
+                string* valPtr = new string(val);
                 insert(key, (void*)valPtr);   
                 // 4. Schedule for deletion on remote
                 toTake.push_back(key); 
@@ -264,7 +292,22 @@ HashTable::HashTable(int sz, string name, map<size_t, string> hash, set<string> 
     }
 }
 
+void HashTable::stopServerFunc(map<size_t, string> hash, set<string> Nodes) {
+    vector<string> localKeys = exportAll();
+    for (const string& key : localKeys) {
+        string nodeAddr = check(key, hash);
+
+        void* val = get(key);
+        string* valPtr = static_cast<string*>(val);
+        RPC::setValueToNode(nodeAddr, key, *valPtr);
+
+        remove(key);
+    }
+    stopServer.store(true);
+}
+
 HashTable::~HashTable() {
+    stopServer.store(true);
     for (int i = 0; i < size; ++i)
         delete buckets[i];
     pthread_mutex_destroy(&lock);

@@ -12,27 +12,28 @@ void handleClient(int clientSock, HashTable* ht) {
     char buffer[4096] = {0};
     int bytesRead = recv(clientSock, buffer, sizeof(buffer), 0);
     if (bytesRead > 0) {
-        std::string request(buffer);
-        std::string response = ht->handleRPCRequest(request);
+        string request(buffer);
+        string response = ht->handleRPCRequest(request);
         send(clientSock, response.c_str(), response.length(), 0);
     } else {
-        std::cerr << "Error receiving data from client." << std::endl;
+        cerr << "Error receiving data from client." << endl;
     }
     close(clientSock);  // Close the client socket
 }
 
-void startHashTableServer(const std::string& node, map<size_t, string> hashes, std::set<std::string>& allNodes) {
+void startHashTableServer(const string& node, map<size_t, string> hashes, set<string>& allNodes, map<string, HashTable*> &serverMap) {
     auto pos = node.find(":");
-    std::string portStr = node.substr(pos + 1);
-    int port = std::stoi(portStr);
+    string portStr = node.substr(pos + 1);
+    int port = stoi(portStr);
 
     // Create the HashTable instance
     HashTable* ht = new HashTable(50, node, hashes, allNodes);
+    serverMap[node] = ht;
 
     // --- Set up server socket
     int serverSock = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSock == -1) {
-        std::cerr << "Error creating socket for " << node << std::endl;
+        cerr << "Error creating socket for " << node << endl;
         return;
     }
 
@@ -42,28 +43,28 @@ void startHashTableServer(const std::string& node, map<size_t, string> hashes, s
     addr.sin_addr.s_addr = INADDR_ANY;
 
     if (bind(serverSock, (sockaddr*)&addr, sizeof(addr)) == -1) {
-        std::cerr << "Bind failed for " << node << " with error: " << strerror(errno) << std::endl;
+        cerr << "Bind failed for " << node << " with error: " << strerror(errno) << endl;
         close(serverSock);
         return;
     }
 
     if (listen(serverSock, 10) == -1) {
-        std::cerr << "Listen failed on " << node << std::endl;
+        cerr << "Listen failed on " << node << endl;
         close(serverSock);
         return;
     }
 
-    std::cout << "Hash table server listening on " << node << std::endl;
+    cout << "Hash table server listening on " << node << endl;
 
     // --- Accept loop
-    while (true) {
+    while (!ht->serverStopSig()) {
         int clientSock = accept(serverSock, nullptr, nullptr);
         if (clientSock == -1) {
-            std::cerr << "Failed to accept connection on " << node << std::endl;
+            cerr << "Failed to accept connection on " << node << endl;
             continue;
         }
 
-        std::thread([clientSock, ht]() {
+        thread([clientSock, ht]() {
             handleClient(clientSock, ht);  // Handle the client in a new thread
         }).detach();
     }
@@ -102,7 +103,7 @@ void ConsistentHashRing::addNode (const string& node) {
     }
 
     // Start the hash table server in a separate thread
-    thread serverThread(startHashTableServer, node, std::ref(this->hashRing), std::ref(this->nodes));  
+    thread serverThread(startHashTableServer, node, ref(this->hashRing), ref(this->nodes), ref(this->serverMap));  
     serverThread.detach(); 
 }
 
@@ -115,4 +116,7 @@ void ConsistentHashRing::removeNode (const string& node)  {
         int hashVal = hashFunc(virtualNode);
         hashRing.erase(hashVal);
     }
+
+    HashTable *ht = serverMap[node];
+    ht->stopServerFunc(this->hashRing, this->nodes);
 }
