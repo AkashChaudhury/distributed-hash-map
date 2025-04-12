@@ -23,6 +23,10 @@ but in scenario 2, data will get to another node, even if node fails, the data w
 
 So I went with approach 1
 
+5. My Hash Table servers will initiate from ConsistentHashRing Server.
+They are not independent
+
+
 
 How to Run:
 
