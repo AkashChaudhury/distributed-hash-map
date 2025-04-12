@@ -14,6 +14,7 @@
 #include <arpa/inet.h>
 #include <sstream>
 #include <set>
+#include <map>
 
 
 using namespace std;
@@ -113,7 +114,7 @@ private:
     int hashFunc(const string& key);
 public:
     HashTable(int sz, string name);
-    HashTable(int sz, string name, int hash, set<string> Nodes);
+    HashTable(int sz, string name, map<size_t, string> hash, set<string> Nodes);
     
     ~HashTable();
     void insert(const string& key, void *value);

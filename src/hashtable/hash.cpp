@@ -221,8 +221,14 @@ HashTable::HashTable(int sz, string name) : size(sz) {
     pthread_mutex_init(&lock, nullptr);
 }
 
+string check(string key, map<size_t, string> hashRing) {
+    int hashVal = HashFunc(key, MAX_HASH);
+    auto it = hashRing.lower_bound(hashVal);
+    if (it == hashRing.end()) return hashRing.begin()->second;
+    return it->second;
+}
 
-HashTable::HashTable(int sz, string name, int hash, set<string> Nodes) : size(sz) {
+HashTable::HashTable(int sz, string name, map<size_t, string> hash, set<string> Nodes) : size(sz) {
     MyNodeName = name;
     buckets.reserve(sz);
     for (int i = 0; i < sz; ++i) {
@@ -231,6 +237,8 @@ HashTable::HashTable(int sz, string name, int hash, set<string> Nodes) : size(sz
     pthread_mutex_init(&lock, nullptr);
     int myHash = HashFunc(name, size);
     for (const string& nodeAddr : Nodes) {
+
+        cout << "\nGet Keys from " << nodeAddr << "\n";
         // Skip fetching from self
         if (HashFunc(nodeAddr, MAX_HASH) == myHash) continue;
 
@@ -239,8 +247,9 @@ HashTable::HashTable(int sz, string name, int hash, set<string> Nodes) : size(sz
 
         vector<string> toTake;
         for (const string& key : remoteKeys) {
-            int ownerHash = HashFunc(key, MAX_HASH);
-            if (ownerHash == myHash) {
+            cout << "\nCheck Keys from " << nodeAddr << " key = " << key << " should be in " << check(key, hash) << "\n";
+            if (check(key, hash) == name) {
+                cout << "\nInsert Key from node " << nodeAddr << " key = " << key  << "\n";
                 // 2. Get the value from the remote node
                 string val = getValueFromNode(nodeAddr, key); 
 

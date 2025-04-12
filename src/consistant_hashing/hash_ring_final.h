@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include "../hash_functions/hash_functions.h"
+#include "../hashtable/hash.h"
 using namespace std;
 
 class ConsistentHashRing {
