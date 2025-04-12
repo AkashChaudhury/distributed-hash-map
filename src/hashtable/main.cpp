@@ -12,7 +12,7 @@ void printValue(void *value) {
 }
 
 int main() {
-    HashTable ht(10);
+    HashTable ht(10, "Node1");
 
     int *val1 = new int(100);
     int *val2 = new int(200);

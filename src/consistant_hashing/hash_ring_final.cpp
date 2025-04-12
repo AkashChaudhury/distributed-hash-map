@@ -6,11 +6,7 @@ ConsistentHashRing::ConsistentHashRing(int virtualNodes) {
 }
 
 int ConsistentHashRing::hashFunc(const string& key) {
-    long long hash = 5381;
-    for (char c : key) {
-        hash = hash * 33 + c;
-    }
-    return hash%MAX_HASH;
+    return HashFunc(key, MAX_HASH);
 }
 
 string ConsistentHashRing::getNodeForKey (string key) {

@@ -6,9 +6,8 @@
 #include <set>
 #include <string>
 #include <vector>
+#include "../hash_functions/hash_functions.h"
 using namespace std;
-
-static const size_t MAX_HASH = 1e6;
 
 class ConsistentHashRing {
     int numVirtualNodes;

@@ -8,6 +8,13 @@ Node::Node() {
     prev = nullptr;
 }
 
+Node::Node(string k) {
+    key = k;
+    value = nullptr;
+    next = nullptr;
+    prev = nullptr;
+}
+
 Node::Node(string k, void *v) {
     key = k;
     value = v;
@@ -15,8 +22,7 @@ Node::Node(string k, void *v) {
     prev = nullptr;
 }
 
-HashEntry::HashEntry(int key) {
-    hashKey = key;
+LinkedList::LinkedList() {
     head = new Node();
     tail = new Node();
     head->next = tail;
@@ -24,7 +30,7 @@ HashEntry::HashEntry(int key) {
     len = 0;
 }
 
-void HashEntry::addNode(Node *n) {
+void LinkedList::addNode(Node *n) {
     len++;
     if (head->next == tail) {
         head->next = n;
@@ -40,13 +46,26 @@ void HashEntry::addNode(Node *n) {
     }
 }
 
-void HashEntry::delNode(Node *n) {
+void LinkedList::delNode(Node *n) {
     len--;
     Node *next = n->next;
     Node *prev = n->prev;
     next->prev = prev;
     prev->next = next;
     delete n;
+}
+
+Node* LinkedList::getNode(string key) {
+    Node *temp = head->next;
+    while (temp != tail) {
+        if (temp->key == key) return temp;
+        temp = temp->next;
+    }
+    return nullptr;
+}
+
+HashEntry::HashEntry(int key):LinkedList() {
+    hashKey = key;
 }
 
 void HashEntry::add(Node *val) {
@@ -58,25 +77,17 @@ void HashEntry::del(Node *val) {
 }
 
 bool HashEntry::checkKey(string key) {
-    Node *temp = head->next;
-    while (temp != tail) {
-        if (temp->key == key) return true;
-        temp = temp->next;
-    }
-    return false;
+    Node *temp = getNode(key);
+    return temp?true:false;
 }
 
 void* HashEntry::returnVal(string key) {
-    Node *temp = head->next;
-    while (temp != tail) {
-        if (temp->key == key) return temp->value;
-        temp = temp->next;
-    }
-    return 0;
+    return getNode(key)->value;
 }
 
 void HashEntry::delKey(string key) {
-    Node *temp = head->next;
+    Node *temp = getHead()->next;
+    Node *tail = getTail();
     while (temp != tail) {
         if (temp->key == key) {
             del(temp);
@@ -91,18 +102,161 @@ void HashEntry::addKey(string key, void *value) {
     add(temp);
 }
 
+
+vector<string> RPC::split(const string& str, char delim) {
+    vector<string> out;
+    stringstream ss(str);
+    string token;
+    while (getline(ss, token, delim)) {
+        out.push_back(token);
+    }
+    return out;
+}
+
+int RPC::connectToServer(const string& ip, int port) {
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) return -1;
+
+    sockaddr_in serverAddr{};
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(port);
+    inet_pton(AF_INET, ip.c_str(), &serverAddr.sin_addr);
+
+    if (connect(sock, (sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
+        close(sock);
+        return -1;
+    }
+
+    return sock;
+}
+
+vector<string> RPC::getKeysFromNode(const string& nodeAddr) {
+    // Parse IP:port
+    size_t colonPos = nodeAddr.find(':');
+    if (colonPos == string::npos) return {};
+
+    string ip = nodeAddr.substr(0, colonPos);
+    int port = stoi(nodeAddr.substr(colonPos + 1));
+
+    // Connect and request keys
+    int sock = connectToServer(ip, port);
+    if (sock < 0) return {};
+
+    string request = "GETKEYS\n";
+    send(sock, request.c_str(), request.size(), 0);
+
+    char buffer[4096] = {0};
+    recv(sock, buffer, sizeof(buffer), 0);
+    close(sock);
+
+    return split(string(buffer), ',');
+}
+
+
+string RPC::getValueFromNode(const string& nodeAddr, const string& key) {
+    // Parse IP:port
+    size_t colonPos = nodeAddr.find(':');
+    if (colonPos == string::npos) return "";
+
+    string ip = nodeAddr.substr(0, colonPos);
+    int port = stoi(nodeAddr.substr(colonPos + 1));
+
+    // Connect to the server
+    int sock = connectToServer(ip, port);
+    if (sock < 0) return "";
+
+    string request = "GETVAL " + key + "\n";
+    send(sock, request.c_str(), request.size(), 0);
+
+    char buffer[4096] = {0};
+    int bytesRead = recv(sock, buffer, sizeof(buffer), 0);
+    close(sock);
+
+    if (bytesRead <= 0) return "";
+
+    return string(buffer);
+}
+
+
+void RPC::deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys) {
+    // Parse IP:port
+    size_t colonPos = nodeAddr.find(':');
+    if (colonPos == string::npos) return;
+
+    string ip = nodeAddr.substr(0, colonPos);
+    int port = stoi(nodeAddr.substr(colonPos + 1));
+
+    // Connect to the server
+    int sock = connectToServer(ip, port);
+    if (sock < 0) return;
+
+    ostringstream oss;
+    oss << "DELKEYS ";
+    for (size_t i = 0; i < keys.size(); ++i) {
+        oss << keys[i];
+        if (i != keys.size() - 1) oss << ",";
+    }
+    oss << "\n";
+
+    string request = oss.str();
+    send(sock, request.c_str(), request.size(), 0);
+
+    close(sock);
+}
+
+
+
 // ---------------- HashTable ----------------
 
 // each bucket has its own HashEntry
 // cant use 
 // buckets = vector<HashEntry*>(sz, new HashEntry(0));
 // Learned something new :)
-HashTable::HashTable(int sz) : size(sz) {
+HashTable::HashTable(int sz, string name) : size(sz) {
+    MyNodeName = name;
     buckets.reserve(sz);
     for (int i = 0; i < sz; ++i) {
         buckets.push_back(new HashEntry(i));
     }
     pthread_mutex_init(&lock, nullptr);
+}
+
+
+HashTable::HashTable(int sz, string name, int hash, set<string> Nodes) : size(sz) {
+    MyNodeName = name;
+    buckets.reserve(sz);
+    for (int i = 0; i < sz; ++i) {
+        buckets.push_back(new HashEntry(i));
+    }
+    pthread_mutex_init(&lock, nullptr);
+    int myHash = HashFunc(name, size);
+    for (const string& nodeAddr : Nodes) {
+        // Skip fetching from self
+        if (HashFunc(nodeAddr, MAX_HASH) == myHash) continue;
+
+        // 1. Ask other node to export all its keys
+        vector<string> remoteKeys = getKeysFromNode(nodeAddr);
+
+        vector<string> toTake;
+        for (const string& key : remoteKeys) {
+            int ownerHash = HashFunc(key, MAX_HASH);
+            if (ownerHash == myHash) {
+                // 2. Get the value from the remote node
+                string val = getValueFromNode(nodeAddr, key); 
+
+                // 3. Insert into local table
+                string* valPtr = new std::string(val);
+                insert(key, (void*)valPtr);   
+                // 4. Schedule for deletion on remote
+                toTake.push_back(key); 
+            }
+        }
+
+        // 5. Ask the remote node to delete the moved keys
+        if (!toTake.empty()) {
+            deleteKeysOnNode(nodeAddr, toTake);
+        }
+    }
 }
 
 HashTable::~HashTable() {
@@ -116,11 +270,7 @@ HashTable::~HashTable() {
 // found this in google
 // more optimized
 int HashTable::hashFunc(const string& key) {
-    long long hash = 5381;
-    for (char c : key) {
-        hash = hash * 33 + c;
-    }
-    return hash % size;
+    return HashFunc(key, size);
 }
 
 void HashTable::insert(const string& key, void *value) {
@@ -128,8 +278,14 @@ void HashTable::insert(const string& key, void *value) {
     int idx = hashFunc(key);
     if (buckets[idx]->checkKey(key)) {
         buckets[idx]->delKey(key);
+        metadataKey.erase(key);
     }
     buckets[idx]->addKey(key, value);
+
+    Node *temp = new Node(key);
+    metadata.addNode(temp);
+    metadataKey[key] = temp;
+
     pthread_mutex_unlock(&lock);
 }
 
@@ -152,7 +308,128 @@ void* HashTable::get(const string& key) {
 void HashTable::remove(const string& key) {
     pthread_mutex_lock(&lock);
     int idx = hashFunc(key);
-    if (buckets[idx]->checkKey(key))
+    if (buckets[idx]->checkKey(key)) {
         buckets[idx]->delKey(key);
+        Node *temp = metadata.getNode(key);
+        metadata.delNode(temp);
+        metadataKey.erase(key);
+    }
+        
     pthread_mutex_unlock(&lock);
+}
+
+vector<string> HashTable::exportAll() {
+    pthread_mutex_lock(&lock);
+    vector<string> result;
+
+    for (int i = 0; i < size; ++i) {
+        Node *curr = buckets[i]->getHead()->next;
+        Node *tail = buckets[i]->getTail();
+
+        while (curr != tail) {
+            result.push_back(curr->key);
+            curr = curr->next;
+        }
+    }
+    pthread_mutex_unlock(&lock);
+    return result;
+}
+
+void HashTable::removeKeys(const vector<string>& keys) {
+    for (const string& key : keys) {
+        // Remove already have lock 
+        // No more lock
+        remove(key);
+    }
+}
+
+
+
+// Handle "GETKEYS"
+string HashTable::handleGetKeys() {
+    vector<string> keys = exportAll();
+    ostringstream oss;
+    for (size_t i = 0; i < keys.size(); ++i) {
+        oss << keys[i];
+        if (i != keys.size() - 1) oss << ",";
+    }
+    return oss.str();
+}
+
+// Retrieve string value from the hash table
+string HashTable::handleGetValue(const string& key) {
+    void* val = get(key);
+    if (val == nullptr) {
+        return "NOT_FOUND";
+    }
+    string* valPtr = static_cast<string*>(val);
+    return *valPtr; 
+}
+
+// Handle "DELKEYS key1,key2,..."
+string HashTable::handleDeleteKeys(const string& keysStr) {
+    vector<string> keys;
+    stringstream ss(keysStr);
+    string key;
+    while (getline(ss, key, ',')) {
+        keys.push_back(key);
+    }
+    removeKeys(keys);
+    return "OK";
+}
+
+// Handle "SET key1,key2,..."
+string HashTable::handleSetValue(const string& key, const string& value) {
+    string* valuePtr = new string(value); 
+    insert(key, static_cast<void*>(valuePtr));
+    return "OK";
+}
+
+// Dispatcher: handle full request string
+string HashTable::handleRPCRequest(const string& input) {
+    istringstream iss(input);
+    string cmd;
+    iss >> cmd;
+
+    if (cmd == "GETKEYS") {
+        return handleGetKeys();
+    } else if (cmd == "GETVAL") {
+        string key;
+        iss >> key;
+        return handleGetValue(key);
+    } else if (cmd == "DELKEYS") {
+        string rest;
+        getline(iss, rest);
+        if (!rest.empty() && rest[0] == ' ') rest = rest.substr(1);
+        return handleDeleteKeys(rest);
+    } else if (cmd == "SETVAL") {
+        string key, value;
+        iss >> key >> value;
+        return handleSetValue(key, value);
+    }
+    else {
+        return "ERR_UNKNOWN_COMMAND";
+    }
+}
+
+vector<string> HashTable::split(const string& str, char delim) {
+    return RPC::split(str, delim);
+}
+
+int HashTable::connectToServer(const string& ip, int port) {
+    return RPC::connectToServer(ip, port);
+}
+
+vector<string> HashTable::getKeysFromNode(const string& nodeAddr) {
+    return RPC::getKeysFromNode(nodeAddr);
+}
+
+
+string HashTable::getValueFromNode(const string& nodeAddr, const string& key) {
+    return RPC::getValueFromNode(nodeAddr, key);
+}
+
+
+void HashTable::deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys) {
+    RPC::deleteKeysOnNode(nodeAddr, keys);
 }

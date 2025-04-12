@@ -20,6 +20,12 @@ g++ -o hashtable main.cpp hash.cpp -pthread
 
 
 
-Server
-g++ -o hash_table_server hash_service.cpp hash.cpp -lpthread
-./hash_table_server 9090
+ubuntu@myDev:~/Desktop/distributed-hash-map/src/hashtable$ g++ -o hashtable mainServer.cpp hash.cpp ../hash_functions/hash_functions.cpp  -pthread
+ubuntu@myDev:~/Desktop/distributed-hash-map/src/hashtable$ ./hashtable 5001 node1
+Server listening on port 5001
+
+ubuntu@myDev:~/Desktop/distributed-hash-map/src/hashtable$ echo "SETVAL key2 value2" | nc 127.0.0.1 5001
+OKubuntu@myDev:~/Desktop/distributed-hash-map/src/hashtable$ echo "GETKEYS" | nc 127.0.0.1 5001
+key2ubuntu@myDev:~/Desktop/distributed-hash-map/src/hashtable$ echo "GETVAL key2" | nc 127.0.0.1 5001
+value2ubuntu@myDev:~/Desktop/distributed-hash-map/src/hashtable$ echo "GETVAL key2" | nc 127.0.0.1 5002^C
+ubuntu@myDev:~/Desktop/distributed-hash-map/src/hashtable$
