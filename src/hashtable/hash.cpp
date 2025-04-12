@@ -178,7 +178,6 @@ string RPC::getValueFromNode(const string& nodeAddr, const string& key) {
 }
 
 void RPC::setValueToNode(const string& nodeAddr, const string& key, const string& val) {
-    void RPC::setValueToNode(const string& nodeAddr, const string& key, const string& val) {
     // Parse IP:port
     size_t colonPos = nodeAddr.find(':');
     if (colonPos == string::npos) return;
@@ -426,7 +425,7 @@ string HashTable::handleDeleteKeys(const string& keysStr) {
     return "OK";
 }
 
-// Handle "SET key1,key2,..."
+// Handle "SETVAL key1,key2,..."
 string HashTable::handleSetValue(const string& key, const string& value) {
     string* valuePtr = new string(value); 
     insert(key, static_cast<void*>(valuePtr));

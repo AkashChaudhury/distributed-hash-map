@@ -85,7 +85,6 @@ int ConsistentHashRing::hashFunc(const string& key) {
 
 string ConsistentHashRing::getNodeForKey (string key) {
     if (hashRing.empty()) return "";
-
     int hashVal = hashFunc(key);
     auto it = hashRing.lower_bound(hashVal);
     if (it == hashRing.end()) return hashRing.begin()->second;

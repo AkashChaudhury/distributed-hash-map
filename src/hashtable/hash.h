@@ -7,8 +7,8 @@
 #include <unordered_map>
 #include "../hash_functions/hash_functions.h"
 
-#include <cstring>     // for memset
-#include <unistd.h>    // for close()
+#include <cstring>     
+#include <unistd.h>  
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

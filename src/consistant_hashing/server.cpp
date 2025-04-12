@@ -16,6 +16,7 @@ void printMenu() {
     cout << "4. Set Key-Value\n";
     cout << "5. Remove Node\n"; 
     cout << "6. Exit\n";
+    cout << "7. Delete\n";
     cout << "Choose an option: ";
 }
 
@@ -114,6 +115,20 @@ int main() {
             getline(cin, node);
             ring.removeNode(node);
             cout << "Node " << node << " removed successfully.\n";
+        }
+        else if (choice == 7) {
+            string key;
+            cout << "Enter key to delete value: ";
+            getline(cin, key);
+            string node = ring.getNodeForKey(key);
+
+            if (node.empty()) {
+                cout << "No nodes available in the ring.\n";
+            } else {
+                string request = "DELKEYS " + key;
+                string response = sendRPC(node, request);
+                cout << "::DELETED";
+            }
         }
         else if (choice == 6) {
             cout << "Exiting.\n";
