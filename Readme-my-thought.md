@@ -1,93 +1,103 @@
+Here’s your revised write-up with corrected spelling and grammar, while keeping your original structure and technical context intact:
 
-Stage 1:
-1. Only Hash Map is proderly Distributed.
+---
 
-2. In this model, I gave more priority to Highly Available the consystency.
+### **Stage 1:**
 
-3. For consystancy there should be altealst 3 copies of data.
+1. Only the Hash Map is properly distributed and thread safe
 
-4. During Adding and Removing Nodes:
+2. In this model, I gave more priority to High Availability than to Consistency.
 
-There are 2 things we can do to maintain Consistancey:
+3. For consistency, there should be at least **3 copies** of the data.
 
-a. Either let Consystancey hashing take responsibility of Transfering the data
+4. **During Adding and Removing Nodes:**
 
-b. Let the nodes take responsibility of Transfering the data
+There are two strategies we can use to maintain consistency:
 
-[Pros and Cons]
+**a.** Let the **Consistent Hashing** logic take responsibility for transferring the data.  
+**b.** Let the **nodes themselves** take responsibility for transferring the data.
 
-Althow this code is not a proper distributed system, when comes to consystancy hashing, if ConsistentHashRing fails, when it comes up, it can get data from hashtables.
+**[Pros and Cons]**
 
-If ConsistentHashRing fails, data may not get migrated in scenario 1
-but in scenario 2, data will get to another node, even if node fails, the data will stay in older node, which will maitain HA.
+Although this code is not a fully distributed system, when it comes to consistent hashing:
 
-So I went with approach 1
+- If the `ConsistentHashRing` fails, and then comes back up, it can retrieve data from the existing hash tables.
+- In **scenario (a)**, if the `ConsistentHashRing` fails, data might not get migrated.
+- In **scenario (b)**, data will still be moved to another node. Even if a node fails, the data will remain on the original node, thus maintaining High Availability.
 
-5. My Hash Table servers will initiate from ConsistentHashRing Server.
-They can not be independently created
+So I chose **Approach (a)**.
 
-6. Heart Beat of Hash Table servers are also checked, will be usefull in Stage 2.
+5. My Hash Table servers are always initiated by the `ConsistentHashRing` server.  
+   They **cannot be independently created**.
 
-7. Used a hack 
-    
-    a. Hash Table can store any kind of data 
+6. Heartbeat monitoring of Hash Table servers is implemented — this will be useful in **Stage 2**.
 
-    b. But Rest API are only supporting String (Json)
+7. **Used a hack:**
 
+   a. The Hash Table can store any kind of data.  
+   b. But the REST APIs currently support only strings (in JSON format).
 
+---
 
-How to Run:
-Consistent hashing server
+### **How to Run:**
 
-This is for json implementation
+#### **Consistent Hashing Server**
 
+This is for the JSON implementation:
+
+```bash
 git clone https://github.com/nlohmann/json.git
 
-cd src/consistant_hashing/
+cd src/consistent_hashing/
 
 g++ -o consistent_hash_server CC_Server.cpp hash_ring_final.cpp ../hashtable/hash.cpp ../hash_functions/hash_functions.cpp -lpthread
 
 ./consistent_hash_server
+```
 
+#### **Client:**
 
-Client:
-
+```bash
 cd client
 
-g++ -o client client.cpp 
+g++ -o client client.cpp
 
 ./client
+```
 
-Stage 2:
-Create replicas of key/value pair
-Atleast 3
-When Heart beat is not passed, we can make one more replica
+---
 
-how to implement?
+### **Stage 2:**
 
-When we recive data, we can do something like
+- Create **replicas** of key/value pairs — **at least 3**.
+- When a heartbeat is missed, create one more replica on another node.
 
+**How to implement it:**
 
-1. Key_#_1
+When we receive data, we can:
 
-Key_#_2
-
+**Option 1:** Store keys like:
+```
+Key_#_1  
+Key_#_2  
 Key_#_3
+```
 
-or have 3 different hash functions
+Or use 3 different hash functions —  
+**But** this doesn’t guarantee that data will be placed on **3 different nodes**.
 
-But this does not give us guarenty that everything will go to Different Node
+**Option 2:** Store the key/value pair on **3 different nodes**, and maintain a **metadata DB** that tracks which servers hold which keys.
 
-2. Put the key/Value pair in 3 different nodes. and maintain a DB whic stores servers have which all keys.
+If a heartbeat is missed:
 
-Once heart bit is not found force remove the node from hash function and access the DB and get values from backup nodes
+- Forcefully remove the node from the hash ring.
+- Use the metadata DB to retrieve values from backup nodes.
 
+Still brainstorming the best approach here.
 
-Doing more brainstorm what to do
+---
 
-Stage 3: 
-It is Supported, We can Add or delete Nodes.
-And Data will transfer to other Nodes.
+### **Stage 3:**
 
-
-
+- Adding and removing nodes is **supported**.
+- Data will be **automatically transferred** to other nodes.
