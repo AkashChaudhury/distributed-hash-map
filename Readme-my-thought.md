@@ -28,10 +28,20 @@ They can not be independently created
 
 6. Heart Beat of Hash Table servers are also checked, will be usefull in Stage 2.
 
+7. Used a hack 
+    
+    a. Hash Table can store any kind of data 
+
+    b. But Rest API are only supporting String (Json)
+
 
 
 How to Run:
 Consistent hashing server
+
+This is for json implementation
+
+git clone https://github.com/nlohmann/json.git
 
 cd src/consistant_hashing/
 
