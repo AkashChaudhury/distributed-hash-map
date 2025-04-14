@@ -28,11 +28,9 @@ void startHashTableServer(const string& node, map<size_t, string> hashes, set<st
     string portStr = node.substr(pos + 1);
     int port = stoi(portStr);
 
-    // Create the HashTable instance
     HashTable* ht = new HashTable(50, node, hashes, allNodes);
     serverMap[node] = ht;
 
-    // --- Set up server socket
     int serverSock = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSock == -1) {
         cerr << "Error creating socket for " << node << endl;
@@ -58,7 +56,6 @@ void startHashTableServer(const string& node, map<size_t, string> hashes, set<st
 
     cout << "Hash table server listening on " << node << endl;
 
-    // --- Accept loop
     while (!ht->serverStopSig()) {
         int clientSock = accept(serverSock, nullptr, nullptr);
         if (clientSock == -1) {
@@ -156,7 +153,7 @@ void* ConsistentHashRing::heartbeatMonitor(void* arg) {
             }
         }
 
-        sleep(5);  // Heartbeat interval
+        sleep(5);
     }
 
     return nullptr;
