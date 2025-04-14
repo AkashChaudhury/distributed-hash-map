@@ -1,6 +1,3 @@
-Here’s your revised write-up with corrected spelling and grammar, while keeping your original structure and technical context intact:
-
----
 
 ### **Stage 1:**
 
