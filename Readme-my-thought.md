@@ -42,7 +42,9 @@ g++ -o consistent_hash_server CC_Server.cpp hash_ring_final.cpp ../hashtable/has
 
 Client:
 
-g++ -o client client.cpp -std=c++11:
+cd client
+
+g++ -o client client.cpp 
 
 ./client
 
