@@ -64,14 +64,26 @@ Atleast 3
 When Heart beat is not passed, we can make one more replica
 
 how to implement?
+
 When we recive data, we can do something like
-Key_#_1
+
+
+1. Key_#_1
+
 Key_#_2
+
 Key_#_3
+
+or have 3 different hash functions
 
 But this does not give us guarenty that everything will go to Different Node
 
-Doing more brainstorm shat to do
+2. Put the key/Value pair in 3 different nodes. and maintain a DB whic stores servers have which all keys.
+
+Once heart bit is not found force remove the node from hash function and access the DB and get values from backup nodes
+
+
+Doing more brainstorm what to do
 
 Stage 3: 
 It is Supported, We can Add or delete Nodes.
