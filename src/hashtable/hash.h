@@ -100,7 +100,6 @@ public:
     
 }; 
 
-// ----------- HashTable Class -------------
 class HashTable : private RPC {
 private:
     vector<HashEntry*> buckets;
