@@ -16,9 +16,12 @@
 #include <set>
 #include <map>
 #include <atomic>
+#include "../../json/single_include/nlohmann/json.hpp"
+#include <iostream>
 
 
 using namespace std;
+using json = nlohmann::json;
 
 class Node {
 public:
@@ -142,6 +145,7 @@ public:
     string handleDeleteKeys(const string& keysStr);
     string handleSetValue(const string& key, const string& value);
     string heartBeatResp();
+    bool isValidJson(const std::string& input);
 };
 
 #endif

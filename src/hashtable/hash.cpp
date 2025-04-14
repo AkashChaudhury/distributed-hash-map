@@ -429,7 +429,10 @@ string HashTable::handleDeleteKeys(const string& keysStr) {
 
 // Handle "SETVAL key1,key2,..."
 string HashTable::handleSetValue(const string& key, const string& value) {
-    string* valuePtr = new string(value); 
+    string* valuePtr = new string(value);
+    if (!isValidJson(value)) {
+        return "Json Invalid";
+    }
     insert(key, static_cast<void*>(valuePtr));
     return "OK";
 }
@@ -487,4 +490,13 @@ void HashTable::deleteKeysOnNode(const string& nodeAddr, const vector<string>& k
 
 string HashTable::heartBeatResp() {
     return RPC::heartBeatResp();
+}
+
+bool HashTable::isValidJson(const std::string& input) {
+    try {
+        auto j = json::parse(input);
+        return true; // Successfully parsed
+    } catch (json::parse_error& e) {
+        return false; // Failed to parse
+    }
 }
