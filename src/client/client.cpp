@@ -4,7 +4,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include <cstring>  // for memcpy
+#include <cstring> 
 
 using namespace std;
 
