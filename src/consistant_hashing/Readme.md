@@ -1,11 +1,13 @@
-This is implementation of Consistant Hashing
+This is an implementation of Consistent Hashing
+APIs:
+Get Node
+Get the node from the hash ring where hashing-related operations are to be performed.
 
-API:
+Add Node
+Add a new node to the hash ring.
 
-Get Node: get node for Hashing table, where hashing related perf are to be done
+Delete Node
+Remove a node from the hash ring.
 
-Add Node: Add a node
-
-Delete Node: Delete a node
-
-Check heartbit of HashTable Servers
+Check Heartbeat of Hash Table Servers
+Monitor the health of each Hash Table server by checking their heartbeat status.
