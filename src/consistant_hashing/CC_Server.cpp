@@ -30,7 +30,7 @@ void* handleClient(void* arg) {
             string key = request.substr(8); // Extract key
             string node = ring.getNodeForKey(key);
             if (node.empty()) {
-                response = "No node found for key: " + key;
+                response = "No node found";
             } else {
                 response = node;
             }
