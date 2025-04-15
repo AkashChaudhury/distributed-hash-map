@@ -96,6 +96,12 @@ int main() {
     string serverAddress = "127.0.0.1";
     int port = 5000;
 
+    // Start the heartbeat monitor thread
+    pthread_t heartbeatThread;
+    pthread_create(&heartbeatThread, nullptr, ConsistentHashRing::heartbeatMonitor, &ring);
+    pthread_detach(heartbeatThread);
+
+    
     // Start the server for consistent hashing
     startServer(serverAddress, port, ring);
 
