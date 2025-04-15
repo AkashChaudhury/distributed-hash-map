@@ -119,17 +119,19 @@ private:
     void deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys);
 
     int hashFunc(const string& key);
-public:
-    HashTable(int sz, string name);
-    HashTable(int sz, string name, map<size_t, string> hash, set<string> Nodes);
-    
-    ~HashTable();
     void insert(const string& key, void *value);
     bool exists(const string& key);
     void* get(const string& key);
     void remove(const string& key);
     vector<string> exportAll();
     void removeKeys(const vector<string>& keys);
+    
+public:
+    HashTable(int sz, string name);
+    HashTable(int sz, string name, map<size_t, string> hash, set<string> Nodes);
+    
+    ~HashTable();
+
     void stopServerFunc(map<size_t, string> hash, set<string> Nodes);
 
     bool serverStopSig() {
