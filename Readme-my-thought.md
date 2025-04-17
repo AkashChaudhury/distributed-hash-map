@@ -64,7 +64,7 @@ g++ -o client client.cpp
 
 ---
 
-### **Stage 2:**
+### **Stage 2:(Can check the PR)**  
 
 - Create **replicas** of key/value pairs — **at least 3**.
 - When a heartbeat is missed, create one more replica on another node.
