@@ -139,7 +139,7 @@ vector<string> RPC::getKeysFromNode(const string& nodeAddr) {
     int port = stoi(nodeAddr.substr(colonPos + 1));
 
     // Connect and request keys
-    int sock = connectToServer(ip, port);
+    int sock = RPC::connectToServer(ip, port);
     if (sock < 0) return {};
 
     string request = "GETKEYS\n";
@@ -153,7 +153,7 @@ vector<string> RPC::getKeysFromNode(const string& nodeAddr) {
 }
 
 
-string RPC::getValueFromNode(const string& nodeAddr, const string& key) {
+string HashTable::getValueFromNode(const string& nodeAddr, const string& key) {
     // Parse IP:port
     size_t colonPos = nodeAddr.find(':');
     if (colonPos == string::npos) return "";
@@ -162,7 +162,7 @@ string RPC::getValueFromNode(const string& nodeAddr, const string& key) {
     int port = stoi(nodeAddr.substr(colonPos + 1));
 
     // Connect to the server
-    int sock = connectToServer(ip, port);
+    int sock = RPC::connectToServer(ip, port);
     if (sock < 0) return "";
 
     string request = "GETVAL " + key + "\n";
@@ -202,7 +202,7 @@ void RPC::setValueToNode(const string& nodeAddr, const string& key, const string
 }
 
 
-void RPC::deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys) {
+void HashTable::deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys) {
     // Parse IP:port
     size_t colonPos = nodeAddr.find(':');
     if (colonPos == string::npos) return;
@@ -211,7 +211,7 @@ void RPC::deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys) {
     int port = stoi(nodeAddr.substr(colonPos + 1));
 
     // Connect to the server
-    int sock = connectToServer(ip, port);
+    int sock = RPC::connectToServer(ip, port);
     if (sock < 0) return;
 
     ostringstream oss;
@@ -476,16 +476,6 @@ int HashTable::connectToServer(const string& ip, int port) {
 
 vector<string> HashTable::getKeysFromNode(const string& nodeAddr) {
     return RPC::getKeysFromNode(nodeAddr);
-}
-
-
-string HashTable::getValueFromNode(const string& nodeAddr, const string& key) {
-    return RPC::getValueFromNode(nodeAddr, key);
-}
-
-
-void HashTable::deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys) {
-    RPC::deleteKeysOnNode(nodeAddr, keys);
 }
 
 string HashTable::heartBeatResp() {

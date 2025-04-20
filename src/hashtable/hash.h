@@ -92,8 +92,6 @@ public:
     int connectToServer(const string& ip, int port);
     vector<string> split(const string& str, char delim);
     vector<string> getKeysFromNode(const string& nodeAddr);
-    string getValueFromNode(const string& nodeAddr, const string& key);
-    void deleteKeysOnNode(const string& nodeAddr, const vector<string>& keys);
     void setValueToNode(const string& nodeAddr, const string& key, const string& val);
     // RPC Server-handling methods
     string heartBeatResp();
