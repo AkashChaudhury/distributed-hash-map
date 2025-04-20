@@ -136,8 +136,6 @@ public:
         return stopServer;
     }
 
-    // want to shift this to RPC class
-    // but time limitations are there
     string handleRPCRequest(const string& request);
     string handleGetKeys();
     string handleGetValue(const string& key);
