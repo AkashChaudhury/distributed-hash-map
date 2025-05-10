@@ -149,7 +149,21 @@ void* ConsistentHashRing::heartbeatMonitor(void* arg) {
         for (string value : ring->nodes) {
             cout << value << " ";
             if (!ring->isNodeAlive(value)) {
-                cout << "[Heartbeat] Node down: " << value << " — removing from ring.\n";
+                cout << "[Heartbeat] Node down: " << value << " — removing from ring.\n";              
+                ring->deadServer[value]++;
+                // wait for 5 heart beat
+                if (ring->deadServer[value] == 5) {
+                    // if it does not come back, transfer data to someone else
+                }
+            }
+            else {
+                // check dead server came up
+                if (ring->deadServer.count(value) != 0) {
+                    ring->deadServer.erase(value);
+                }
+                // update metadata
+                vector<string> remoteKeys = ring->getKeysFromNode(value);
+                ring->metadata[value] = remoteKeys;
             }
         }
 

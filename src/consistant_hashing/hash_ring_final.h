@@ -24,9 +24,11 @@ class ConsistentHashRing : public RPC{
     map<size_t, string> hashRing;
     set<string> nodes;
     map<string, HashTable*> serverMap;
-    // void handleClient(int clientSock, HashTable* ht);
 
 public:
+    map<string, vector<string>> metadata;
+    map<string, int> deadServer;
+
     ConsistentHashRing(int virtualNodes);
     void addNode(const string& node);
     void removeNode(const string& node);
